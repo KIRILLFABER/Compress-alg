@@ -1,4 +1,4 @@
-def compressed(text):
+def compress(text): # T(n) = 6 + (n - 1)(1 + 1 + 2) + 4 = 6 + 4n - 4 + 4 = 4n + 6 = O(n)
     text += "#"
     c = 1
     notRepeatCounter = 0
@@ -54,11 +54,4 @@ def decompress(text):
 # 5a(133)bcde3f
 
 
-f_input = open("input.txt", "r", encoding="utf-8")
-text = f_input.read()
-print(len(text) > len(compressed(text)))
-text = compressed(text)
-print("AaaaaaaaaaaaaaaaPPPP ghas Asdf AAAdef")
-print(decompress(text))
 
-f_input.close()
