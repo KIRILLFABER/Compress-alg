@@ -1,57 +1,46 @@
-def compress(text): # T(n) = 6 + (n - 1)(1 + 1 + 2) + 4 = 6 + 4n - 4 + 4 = 4n + 6 = O(n)
-    text += "#"
+def compress(data):
+    data += b"#"
     c = 1
     notRepeatCounter = 0
-    comp_text = ""
-    prev_s = text[0]
-    l = ""
+    comp_data = b""
+    prev_byte = data[0]
+    l = b""
 
-    for s in text[1:]:
-        if s == prev_s:
+    for byte in data[1:]:
+        if byte == prev_byte:
             c += 1
-            comp_text += (chr(notRepeatCounter + 128) if notRepeatCounter != 0 else '')  + l
-            l = ''
-            notRepeatCounter = 0
+            if notRepeatCounter != 0:
+                comp_data += bytes([notRepeatCounter + 128]) + l
+                l = b""
+                notRepeatCounter = 0
         else:
-            if (c == 1):
-                l += prev_s
-                prev_s = s
+            if c == 1:
+                l += bytes([prev_byte])
                 notRepeatCounter += 1
             else:
-                comp_text += chr(c) + prev_s
-                prev_s = s
-                c = 1
-    comp_text += (chr(notRepeatCounter + 128) if notRepeatCounter != 0 else '')  + l
-            
-                
+                comp_data += bytes([c]) + bytes([prev_byte])
+            prev_byte = byte
+            c = 1
 
-    return comp_text
-            
+    if notRepeatCounter != 0:
+        comp_data += bytes([notRepeatCounter + 128]) + l
 
-def decompress(text):
-    decomp_text = ''
-    notRepeatFlag = False
+    return comp_data
+
+
+def decompress(data):
+    decomp_data = b""
     i = 0
-    while i < len(text):
-        if ord(text[i]) >= 128:
-            c = ord(text[i]) - 128 # кол-во неповторяющихся символов
-            decomp_text += text[i + 1:i + c + 1]
-            i += c + 1
+
+    while i < len(data):
+        byte = data[i]
+        if byte >= 128:
+            count = byte - 128
+            decomp_data += data[i + 1:i + 1 + count]
+            i += 1 + count
         else:
-            decomp_text += text[i + 1] * ord(text[i])
+            count = byte
+            decomp_data += bytes([data[i + 1]]) * count
             i += 2
-    return decomp_text
 
-
-
-        
-            
-
-
-
-
-# aaaaabcdefff
-# 5a(133)bcde3f
-
-
-
+    return decomp_data

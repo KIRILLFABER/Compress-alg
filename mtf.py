@@ -1,13 +1,13 @@
 
-def compress(text, l = []):
-    l = [chr(i) for i in range(128)]
+def compress(data, l = []):
+    l = [bytes([i]) for i in range(256)]
     #[print(f'{i} - {l[i]}') for i in range(len(l))]
-    result = []
-    for i in text:
-        result.append(l.index(i))
-        l.pop(l.index(i))
-        l.insert(0, i)
-    print(result)
+    result = b''
+    for i in data:
+        result += bytes([l.index(bytes([i]))])
+        l.pop(l.index(bytes([i])))
+        l.insert(0, bytes([i]))
+    #print(result)
     return result
         
 
@@ -18,13 +18,13 @@ def compress(text, l = []):
 
 
 
-def decompress(seq, l):
-    decomp_text = ''
-    for i in seq:
+def decompress(data, l = []):
+    l = [bytes([i]) for i in range(256)]
+    decomp_data = b''
+    for i in data:
         d = l.pop(i)
-        decomp_text += d
+        decomp_data += d
         l.insert(0, d)
-    print(decomp_text)
+    return decomp_data
 
 
-decompress(compress("bananaaa"), l = [chr(i) for i in range(128)])

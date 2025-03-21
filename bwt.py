@@ -1,24 +1,22 @@
 
 
-def compress(text): # time complexity:s
-    matrix = [text[i:] + text[0:i] for i in range(len(text))]
+def compress(data): # time complexity:
+    matrix = [data[i:] + data[0:i] for i in range(len(data))]
     matrix.sort()
-    index = matrix.index(text)
-    last_col = "".join(list(map(lambda x: x[-1], matrix)))
-    [print(i) for i in matrix]
-    print(index)
-
-
-    return (index, last_col)
+    index = matrix.index(data)
+    last_col = bytes(list(map(lambda x: x[-1], matrix)))
+    return index.to_bytes(4, 'big') + last_col
 
 
 
 # Доделать
-def decompress(index, last_col):
-    matrix = ["" for i in range(len(last_col))]
-    for _ in range(len(last_col)):
-        for j in range(len(last_col)):
-            matrix[j] = last_col[j] + matrix[j]
+def decompress(data):
+    index = int.from_bytes(data[:4], 'big')
+    data = data[4:]
+    matrix = [b"" for i in range(len(data))]
+    for _ in range(len(data)):
+        for j in range(len(data)):
+            matrix[j] = bytes([data[j]]) + matrix[j]
         matrix.sort()
     return matrix[index]
     

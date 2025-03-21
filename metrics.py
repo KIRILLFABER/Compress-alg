@@ -4,8 +4,12 @@ from math import log
 def entropy(l):
     return -sum([(p * log(p, 2)) for p in l])
 
+
 def compressFactor(compress_text, text):
-    return compress_text/text
+    try:
+        return compress_text/text
+    except ZeroDivisionError:
+        return 20000000
 
 
 def prob(seq):
