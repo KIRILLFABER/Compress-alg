@@ -13,25 +13,21 @@ class Node:
         return self.counter < other.counter
 
 def build_tree(text):
-    # Подсчет частот символов
     symbols = defaultdict(int)
     for byte in text:
         symbols[byte] += 1
 
-    # Создаем приоритетную очередь (min-heap)
     heap = []
     for byte, freq in symbols.items():
         node = Node(symbol=byte, counter=freq)
         heapq.heappush(heap, node)
 
-    # Построение дерева Хаффмана
     while len(heap) > 1:
         left = heapq.heappop(heap)
         right = heapq.heappop(heap)
         parent = Node(counter=left.counter + right.counter, left=left, right=right)
         heapq.heappush(heap, parent)
 
-    # Возвращаем корень дерева
     return heapq.heappop(heap)
 
 def generate_codes(node, code="", code_dict=None):
@@ -51,11 +47,9 @@ def serialize_tree(node):
     if node is None:
         return b""
 
-    # Если это лист, записываем 1 и символ
     if node.symbol is not None:
         return b"\x01" + bytes([node.symbol])
 
-    # Если это внутренний узел, записываем 0 и рекурсивно сериализуем левое и правое поддерево
     return b"\x00" + serialize_tree(node.left) + serialize_tree(node.right)
 
 def deserialize_tree(data):
@@ -69,12 +63,10 @@ def deserialize_tree(data):
         index += 1
 
         if flag == 1:
-            # Лист
             symbol = data[index]
             index += 1
             return Node(symbol=symbol)
         elif flag == 0:
-            # Внутренний узел
             left = helper()
             right = helper()
             return Node(left=left, right=right)
@@ -85,34 +77,23 @@ def deserialize_tree(data):
 def compress(text):
     if not text:
         return b""
-
-    # Построение дерева Хаффмана
     root = build_tree(text)
 
-    # Генерация кодов
     codes = generate_codes(root)
 
-    # Кодирование текста
     encoded_bits = "".join([codes[byte] for byte in text])
 
-    # Упаковка битов в байты
     padding = 8 - len(encoded_bits) % 8
-    encoded_bits += "0" * padding  # Добавляем padding, чтобы длина была кратна 8
+    encoded_bits += "0" * padding  
     encoded_bytes = bytearray()
     for i in range(0, len(encoded_bits), 8):
         byte = encoded_bits[i:i+8]
         encoded_bytes.append(int(byte, 2))
 
-    # Сериализация дерева
     tree_bytes = serialize_tree(root)
 
-    # Упаковка данных: padding (1 байт) + длина дерева (4 байта) + дерево + закодированные данные
-    packed_data = (
-        bytes([padding]) +  # 1 байт для padding
-        struct.pack(">I", len(tree_bytes)) +  # 4 байта для длины дерева
-        tree_bytes +  # Сериализованное дерево
-        encoded_bytes  # Закодированные данные
-    )
+
+    packed_data = (bytes([padding]) + struct.pack(">I", len(tree_bytes)) + tree_bytes + encoded_bytes )
 
     return packed_data
 
@@ -120,24 +101,17 @@ def decompress(packed_data):
     if not packed_data:
         return b""
 
-    # Извлечение padding (1 байт)
     padding = packed_data[0]
-
-    # Извлечение длины дерева (4 байта)
     tree_length = struct.unpack(">I", packed_data[1:5])[0]
 
-    # Извлечение дерева
     tree_bytes = packed_data[5:5 + tree_length]
     root = deserialize_tree(tree_bytes)
 
-    # Извлечение закодированных данных
     encoded_bytes = packed_data[5 + tree_length:]
 
-    # Распаковка битов из байтов
     encoded_bits = "".join(f"{byte:08b}" for byte in encoded_bytes)
-    encoded_bits = encoded_bits[:-padding]  # Убираем padding
+    encoded_bits = encoded_bits[:-padding]
 
-    # Декодирование текста
     decoded_text = bytearray()
     current_node = root
     for bit in encoded_bits:

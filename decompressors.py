@@ -38,19 +38,21 @@ def BWT_MTF_RLE_HA(data):
 
 # 6. LZ77
 
-def LZ77(text):
-    return ''
+def LZ77(data):
+    return lz77.decompress(data)
 
 # 7. LZ77 + HA
-def LZ77_HA(text):
-    return ''
+def LZ77_HA(data):
+    ha_decomp = haffman.decompress(data)
+    return lz77.decompress(ha_decomp)
 
 # 8. LZ78
-def LZ78(text):
-    return ''
+def LZ78(data):
+    return lz78.decompress(data)
 
 # 9. LZ78 + HA
-def LZ78_HA(text):
-    return ''
+def LZ78_HA(data):
+    ha_decomp = haffman.decompress(data)
+    return lz78.decompress(ha_decomp)
 
     

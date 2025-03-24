@@ -5,11 +5,8 @@ def entropy(l):
     return -sum([(p * log(p, 2)) for p in l])
 
 
-def compressFactor(compress_text, text):
-    try:
-        return compress_text/text
-    except ZeroDivisionError:
-        return 20000000
+def compressFactor(compress_data, data):
+    return len(data) / len(compress_data)
 
 
 def prob(seq):

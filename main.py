@@ -10,12 +10,16 @@ import tmp ###
 
 
 if __name__ == "__main__":
-    tmp.fillTable()
+    match(int(input("Заполнить таблицу? 1 - Да, остальное - нет: "))):
+        case 1:
+            fillTable.fillTable()
+        case _:
+            pass
+
     f_input = open('enwiki.txt', 'rb')
     data = f_input.read(int(1000))
     print(len(data) > len(compressors.HA(data)))
     print(data == decompressors.HA(compressors.HA(data)))
-    
     
 
 

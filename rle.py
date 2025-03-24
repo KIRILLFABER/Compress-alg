@@ -1,4 +1,4 @@
-def compress(data):
+def compress(data, byte_count=2):
     data += b"#"
     c = 1
     notRepeatCounter = 0
@@ -6,11 +6,13 @@ def compress(data):
     prev_byte = data[0]
     l = b""
 
+    max_count = (1 << (8 * byte_count - 1)) - 1  # Максимальное значение для счетчика
+
     for byte in data[1:]:
         if byte == prev_byte:
             c += 1
             if notRepeatCounter != 0:
-                comp_data += bytes([notRepeatCounter + 128]) + l
+                comp_data += (notRepeatCounter + (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big') + l
                 l = b""
                 notRepeatCounter = 0
         else:
@@ -18,29 +20,30 @@ def compress(data):
                 l += bytes([prev_byte])
                 notRepeatCounter += 1
             else:
-                comp_data += bytes([c]) + bytes([prev_byte])
+                comp_data += c.to_bytes(byte_count, 'big') + bytes([prev_byte])
+                c = 1
             prev_byte = byte
-            c = 1
 
     if notRepeatCounter != 0:
-        comp_data += bytes([notRepeatCounter + 128]) + l
+        comp_data += (notRepeatCounter + (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big') + l
 
     return comp_data
 
-
-def decompress(data):
+def decompress(data, byte_count=2):
     decomp_data = b""
     i = 0
 
     while i < len(data):
-        byte = data[i]
-        if byte >= 128:
-            count = byte - 128
-            decomp_data += data[i + 1:i + 1 + count]
-            i += 1 + count
+        count_bytes = data[i:i + byte_count]
+        count = int.from_bytes(count_bytes, 'big')
+        i += byte_count
+
+        if count & (1 << (8 * byte_count - 1)):  # Проверка старшего бита
+            count -= (1 << (8 * byte_count - 1))
+            decomp_data += data[i:i + count]
+            i += count
         else:
-            count = byte
-            decomp_data += bytes([data[i + 1]]) * count
-            i += 2
+            decomp_data += bytes([data[i]]) * count
+            i += 1
 
     return decomp_data
