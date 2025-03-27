@@ -13,23 +13,29 @@ def RLE(data):
 
 
 # 3. BWT + RLE
-def BWT_RLE(data):
-    bwt_result = bwt.compress(data)
+def BWT_RLE(data, block_size = 1024 * 4):
+    bwt_result = b''
+    for block in [data[i:i + block_size] for i in range(0, len(data), block_size)]:
+        bwt_result += bwt.compress(block)
     return rle.compress(bwt_result)
 
 # 4. BWT + MTF + HA
-def BWT_MTF_HA(data):
-    bwt_result = bwt.compress(data)
+def BWT_MTF_HA(data, block_size = 1024 * 4):
+    bwt_result = b''
+    for block in [data[i:i + block_size] for i in range(0, len(data), block_size)]:
+        bwt_result += bwt.compress(block)
+
     mtf_result = mtf.compress(bwt_result)
     ha_result = haffman.compress(mtf_result)
     return ha_result
 
 
 
-
 # 5. BWT + MTF + RLE + HA
-def BWT_MTF_RLE_HA(data):
-    bwt_result = bwt.compress(data)
+def BWT_MTF_RLE_HA(data, block_size = 1024 * 4):
+    bwt_result = b''
+    for block in [data[i:i + block_size] for i in range(0, len(data), block_size)]:
+        bwt_result += bwt.compress(block)
     mtf_result = mtf.compress(bwt_result)
     rle_result = rle.compress(mtf_result)
     ha_result = haffman.compress(rle_result)
