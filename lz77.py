@@ -1,65 +1,82 @@
-def compress(data, window_size=1024, byte_count=2):
-    if not data:
-        return b""  # Возвращаем пустую байтовую строку, если данные пустые
+import struct
+from collections import defaultdict
 
-    compressed_data = bytearray()
-    i = 0
+def compress(data, window_size=8192, lookahead_size=90):
+    
+    compressed = bytearray()
+    pos = 0
+    length = len(data)
+    
+    hash_table = defaultdict(list)
+    
+    while pos < length:
+        best_offset = 0
+        best_len = 0
+        remaining = length - pos
+        current_lookahead = min(lookahead_size, remaining)
+        
+        if current_lookahead > 0:
+            max_offset = min(window_size, pos)
+            
 
-    while i < len(data):
-        match_length = 0
-        match_offset = 0
+            if remaining >= 3:
+                key = data[pos:pos+3]
+                for candidate in hash_table.get(key, []):
+                    if pos - candidate > max_offset:
+                        continue
+                    
+                    match_len = 0
+                    while (match_len < current_lookahead and
+                           data[candidate + match_len] == data[pos + match_len]):
+                        match_len += 1
+                    
+                    if match_len > best_len:
+                        best_offset = pos - candidate
+                        best_len = match_len
+                        if best_len == current_lookahead:
+                            break
+            
+            if remaining >= 3:
+                hash_table[data[pos:pos+3]].append(pos)
 
-        # Поиск совпадений в пределах окна
-        for j in range(max(0, i - window_size), i):
-            current_length = 0
-            while (i + current_length < len(data) and
-                   j + current_length < i and
-                   data[j + current_length] == data[i + current_length]):
-                current_length += 1
-            if current_length > match_length:
-                match_length = current_length
-                match_offset = i - j
+                if len(hash_table[key]) > 32:
+                    hash_table[key] = hash_table[key][-16:]
+        next_char_pos = pos + best_len
+        next_char = data[next_char_pos] if next_char_pos < length else 0
+        compressed.extend(struct.pack('>HB', best_offset, best_len))
+        if best_len < remaining:
+            compressed.append(next_char)
+        
+        pos += best_len + 1 if best_len < remaining else best_len
+    
+    return bytes(compressed)
 
-        # Если найдено совпадение, добавляем (offset, length)
-        if match_length > 0:
-            compressed_data.extend(match_offset.to_bytes(byte_count, 'big'))
-            compressed_data.extend(match_length.to_bytes(byte_count, 'big'))
-            i += match_length
-        else:
-            # Если совпадение не найдено, добавляем (0, 0, byte)
-            compressed_data.extend((0).to_bytes(byte_count, 'big'))
-            compressed_data.extend((0).to_bytes(byte_count, 'big'))
-            compressed_data.append(data[i])
-            i += 1
-
-    return bytes(compressed_data)
-
-def decompress(compressed_data, window_size=1024, byte_count=2):
-    if not compressed_data:
-        return b""  # Возвращаем пустую байтовую строку, если данные пустые
-
-    decompressed_data = bytearray()
-    i = 0
-
-    while i < len(compressed_data):
-        # Чтение offset и length
-        offset = int.from_bytes(compressed_data[i:i + byte_count], 'big')
-        i += byte_count
-        length = int.from_bytes(compressed_data[i:i + byte_count], 'big')
-        i += byte_count
-
-        if offset == 0 and length == 0:
-            # Если offset и length равны 0, это одиночный байт
-            if i < len(compressed_data):
-                decompressed_data.append(compressed_data[i])
-                i += 1
-            else:
-                break  # Защита от выхода за пределы массива
-        else:
-            # Копирование данных из предыдущих позиций
-            for j in range(length):
-                if len(decompressed_data) >= offset:
-                    decompressed_data.append(decompressed_data[-offset])
+def decompress(compressed):
+    decompressed = bytearray()
+    pos = 0
+    length = len(compressed)
+    
+    while pos + 2 < length:
+        offset = compressed[pos] << 8 | compressed[pos+1]
+        ln = compressed[pos+2]
+        pos += 3
+        
+        if offset > 0:
+            start = len(decompressed) - offset
+            if start >= 0 and ln > 0:
+                end = start + ln
+                if end <= len(decompressed):
+                    decompressed.extend(decompressed[start:end])
                 else:
-                    break  # Защита от выхода за пределы массива
-    return bytes(decompressed_data)
+                    repeat = ln // offset
+                    remainder = ln % offset
+                    for _ in range(repeat):
+                        decompressed.extend(decompressed[start:start+offset])
+                    if remainder:
+                        decompressed.extend(decompressed[start:start+remainder])
+        
+        if pos < length:
+            decompressed.append(compressed[pos])
+            pos += 1
+    
+    return bytes(decompressed)

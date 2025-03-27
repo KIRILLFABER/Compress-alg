@@ -1,49 +1,71 @@
 def compress(data, byte_count=2):
-    data += b"#"
-    c = 1
-    notRepeatCounter = 0
-    comp_data = b""
+    if not data:
+        return b""
+    
+    max_count = (1 << (8 * byte_count)) - 1 
+    comp_data = bytearray()
+    buffer = bytearray()
     prev_byte = data[0]
-    l = b""
-
-    max_count = (1 << (8 * byte_count - 1)) - 1  # Максимальное значение для счетчика
-
+    count = 1
+    
     for byte in data[1:]:
-        if byte == prev_byte:
-            c += 1
-            if notRepeatCounter != 0:
-                comp_data += (notRepeatCounter + (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big') + l
-                l = b""
-                notRepeatCounter = 0
+        if byte == prev_byte and count < max_count:
+            count += 1
         else:
-            if c == 1:
-                l += bytes([prev_byte])
-                notRepeatCounter += 1
+            if count > 1:
+                if buffer:
+                    comp_data.extend((len(buffer) | (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big'))
+                    comp_data.extend(buffer)
+                    buffer.clear()
+                comp_data.extend(count.to_bytes(byte_count, 'big'))
+                comp_data.append(prev_byte)
             else:
-                comp_data += c.to_bytes(byte_count, 'big') + bytes([prev_byte])
-                c = 1
+                buffer.append(prev_byte)
+                if len(buffer) >= max_count:
+                    comp_data.extend((max_count | (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big'))
+                    comp_data.extend(buffer[:max_count])
+                    buffer = buffer[max_count:]
+            count = 1
             prev_byte = byte
-
-    if notRepeatCounter != 0:
-        comp_data += (notRepeatCounter + (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big') + l
-
-    return comp_data
+    if count > 1:
+        if buffer:
+            comp_data.extend((len(buffer) | (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big'))
+            comp_data.extend(buffer)
+        comp_data.extend(count.to_bytes(byte_count, 'big'))
+        comp_data.append(prev_byte)
+    else:
+        buffer.append(prev_byte)
+        if buffer:
+            comp_data.extend((len(buffer) | (1 << (8 * byte_count - 1))).to_bytes(byte_count, 'big'))
+            comp_data.extend(buffer)
+    
+    return bytes(comp_data)
 
 def decompress(data, byte_count=2):
-    decomp_data = b""
+    if not data:
+        return b""
+    
+    decomp_data = bytearray()
     i = 0
-
-    while i < len(data):
-        count_bytes = data[i:i + byte_count]
-        count = int.from_bytes(count_bytes, 'big')
+    n = len(data)
+    mask = 1 << (8 * byte_count - 1)
+    
+    while i < n:
+        if i + byte_count > n:
+            raise ValueError("Invalid compressed data")
+        
+        count = int.from_bytes(data[i:i+byte_count], 'big')
         i += byte_count
-
-        if count & (1 << (8 * byte_count - 1)):  # Проверка старшего бита
-            count -= (1 << (8 * byte_count - 1))
-            decomp_data += data[i:i + count]
-            i += count
+        
+        if count & mask:
+            true_count = count & ~mask
+            if i + true_count > n:
+                raise ValueError("Invalid compressed data")
+            decomp_data.extend(data[i:i+true_count])
+            i += true_count
         else:
-            decomp_data += bytes([data[i]]) * count
+            byte = data[i]
+            decomp_data.extend([byte] * count)
             i += 1
-
-    return decomp_data
+    
+    return bytes(decomp_data)

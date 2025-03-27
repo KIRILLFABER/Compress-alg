@@ -1,30 +1,26 @@
+def compress(data): # time complexity: T(n) = 1 + 1 + 4n = O(n)
+                    # space complexity: S(n) = 256 * 4 + 4 + 4n = O(n)
+    alphabet = list(range(256)) 
+    result = bytearray()
+    
+    for byte in data:
+        idx = alphabet.index(byte)
+        result.append(idx)
+        alphabet.pop(idx)
+        alphabet.insert(0, byte)
+    
+    return bytes(result)
 
-def compress(data, l = []):
-    l = [bytes([i]) for i in range(256)]
-    #[print(f'{i} - {l[i]}') for i in range(len(l))]
-    result = b''
-    for i in data:
-        result += bytes([l.index(bytes([i]))])
-        l.pop(l.index(bytes([i])))
-        l.insert(0, bytes([i]))
-    #print(result)
-    return result
-        
-
-
-
-
-
-
-
-
-def decompress(data, l = []):
-    l = [bytes([i]) for i in range(256)]
-    decomp_data = b''
-    for i in data:
-        d = l.pop(i)
-        decomp_data += d
-        l.insert(0, d)
-    return decomp_data
-
-
+def decompress(data):
+                        # time complexity: T(n) = O(n)
+                        # space complexity: S(n) = O(n)
+    alphabet = list(range(256))
+    result = bytearray()
+    
+    for idx in data:
+        byte = alphabet[idx]
+        result.append(byte)
+        alphabet.pop(idx)
+        alphabet.insert(0, byte)
+    
+    return bytes(result)

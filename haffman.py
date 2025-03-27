@@ -43,7 +43,6 @@ def generate_codes(node, code="", code_dict=None):
     return code_dict
 
 def serialize_tree(node):
-    """Сериализация дерева Хаффмана в байты."""
     if node is None:
         return b""
 
@@ -53,7 +52,6 @@ def serialize_tree(node):
     return b"\x00" + serialize_tree(node.left) + serialize_tree(node.right)
 
 def deserialize_tree(data):
-    """Десериализация дерева Хаффмана из байтов."""
     def helper():
         nonlocal index
         if index >= len(data):
