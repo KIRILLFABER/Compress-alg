@@ -12,21 +12,21 @@ class Node:
     def __lt__(self, other):
         return self.counter < other.counter
 
-def build_tree(text):
+def build_tree(text): # O(nlogn)
     symbols = defaultdict(int)
-    for byte in text:
+    for byte in text: # O(n)
         symbols[byte] += 1
 
     heap = []
-    for byte, freq in symbols.items():
+    for byte, freq in symbols.items(): # O(n)
         node = Node(symbol=byte, counter=freq)
         heapq.heappush(heap, node)
 
-    while len(heap) > 1:
-        left = heapq.heappop(heap)
-        right = heapq.heappop(heap)
-        parent = Node(counter=left.counter + right.counter, left=left, right=right)
-        heapq.heappush(heap, parent)
+    while len(heap) > 1: # O(nlogn)
+        left = heapq.heappop(heap) # O(logn)
+        right = heapq.heappop(heap) # O(logn)
+        parent = Node(counter=left.counter + right.counter, left=left, right=right) # O(logn)
+        heapq.heappush(heap, parent) # O(logn)
 
     return heapq.heappop(heap)
 
@@ -73,13 +73,15 @@ def deserialize_tree(data):
     return helper()
 
 def compress(text):
+                    # Time complexity: T(n) = O(nlogn)
+                    # Space complexity: S(n) = 
     if not text:
         return b""
-    root = build_tree(text)
+    root = build_tree(text) # O(nlogn)
 
-    codes = generate_codes(root)
+    codes = generate_codes(root) # O(logn)
 
-    encoded_bits = "".join([codes[byte] for byte in text])
+    encoded_bits = "".join([codes[byte] for byte in text]) # O(n)
 
     padding = 8 - len(encoded_bits) % 8
     encoded_bits += "0" * padding  
@@ -91,7 +93,7 @@ def compress(text):
     tree_bytes = serialize_tree(root)
 
 
-    packed_data = (bytes([padding]) + struct.pack(">I", len(tree_bytes)) + tree_bytes + encoded_bytes )
+    packed_data = (bytes([padding]) + struct.pack(">I", len(tree_bytes)) + tree_bytes + encoded_bytes)
 
     return packed_data
 

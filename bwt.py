@@ -1,8 +1,8 @@
 
 
-def compress(data): # time complexity: T(n) = 2n + 1 + O(nlogn) + O(n) + 2n + 2 = 2n + O(nlogn) + O(n) + 3 = O(nlogn)
-                    # space complexity: S(n) = n * n + 4 + n = O(n^2)
-    matrix = [data[i:] + data[0:i] for i in range(len(data))]
+def compress(data): # time complexity: T(n) = O(n^2)
+                    # space complexity: S(n) = O(n^2) + 4 + O(n) = O(n^2)
+    matrix = [data[i:] + data[0:i] for i in range(len(data))] # O(n^2)
     matrix.sort()
     index = matrix.index(data)
     last_col = bytes(list(map(lambda x: x[-1], matrix)))
@@ -72,4 +72,3 @@ def counting_sort_arg_bytes(S):
 #         sorted_data.extend([byte] * counts[byte])
     
 #     return bytes(sorted_data)
-

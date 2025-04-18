@@ -1,8 +1,11 @@
 def compress(data, byte_count=2):
+                                    # time complexity: T(n) = 6 + O(n) + 4 = O(n)
+                                    # space complexity: S(n) = 3 * 4 + 2 * O(n) = O(n)
     if not data:
         return b""
     
-    max_count = (1 << (8 * byte_count)) - 1 
+    max_count = (1 << (8 * byte_count)) - 1
+ 
     comp_data = bytearray()
     buffer = bytearray()
     prev_byte = data[0]
@@ -42,6 +45,9 @@ def compress(data, byte_count=2):
     return bytes(comp_data)
 
 def decompress(data, byte_count=2):
+                                    # time complexity: T(n) = 5 + O(n) = O(n)
+                                    # Space complexity: S(n) = (O(n)) + 4 + 4 + 4 = O(n)
+
     if not data:
         return b""
     
@@ -51,16 +57,12 @@ def decompress(data, byte_count=2):
     mask = 1 << (8 * byte_count - 1)
     
     while i < n:
-        if i + byte_count > n:
-            raise ValueError("Invalid compressed data")
         
         count = int.from_bytes(data[i:i+byte_count], 'big')
         i += byte_count
         
         if count & mask:
             true_count = count & ~mask
-            if i + true_count > n:
-                raise ValueError("Invalid compressed data")
             decomp_data.extend(data[i:i+true_count])
             i += true_count
         else:
@@ -69,3 +71,6 @@ def decompress(data, byte_count=2):
             i += 1
     
     return bytes(decomp_data)
+
+
+

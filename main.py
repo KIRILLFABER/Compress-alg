@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import fillTable
+import os
 # import tmp ###
 
 
@@ -10,11 +11,22 @@ import fillTable
 
 
 if __name__ == "__main__":
-    match(int(input("Заполнить таблицу? 1 - Да, остальное - нет: "))):
-        case 1:
-            fillTable.fillTable()
-        case _:
-            pass
+    try:
+        match(int(input("Заполнить таблицу? 1 - Да, остальное - нет: "))):
+            case 1:
+                fillTable.fillTable()
+            case _:
+                pass
+    except:
+        print('error')
+    finally:
+        #os.system('shutdown /s /t 0')
+        print()
+
+        
+
+    
+    
 
     
 

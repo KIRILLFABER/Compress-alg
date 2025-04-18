@@ -7,7 +7,7 @@ def fillTable():
     decompressors_list = [decompressors.HA, decompressors.RLE, decompressors.BWT_RLE, decompressors.BWT_MTF_HA, decompressors.BWT_MTF_RLE_HA, decompressors.LZ77, decompressors.LZ77_HA, decompressors.LZ78, decompressors.LZ78_HA]
     compressors_name = ['HA', 'RLE', 'BWT + RLE', 'BWT + MTF + HA', 'BWT + MTF + RLE + HA', 'LZ77', 'LZ77 + HA', 'LZ78', 'LZ78 + HA']
     data_files = []
-    data_files_name = ['enwik7', 'ru_text.txt', 'exe_file.exe', 'img.CR2', 'grey_img.raw', 'bw_img.raw']
+    data_files_name = ['enwik7', 'ru_text.txt', 'exe_file.exe', 'img.raw', 'grey_img.raw', 'bw_img.raw']
     size = int(5e3)
     data_path = './data/'
     comp_path = './compress_data/'
@@ -40,4 +40,6 @@ def fillTable():
         
 
     table.to_excel('table.xlsx', index=False)
+
+
 

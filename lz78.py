@@ -2,6 +2,8 @@ import struct
 from collections import defaultdict
 
 def compress(data, max_dict_size=65535):
+                                        # Time complexity: T(n) = 4 + 9n + 5 O(n)
+                                        # Space complexity: S(n) = 4 + 1 + 2 + 1 + O(n) = O(n)
     dictionary = {b'': 0}
     next_code = 1
     compressed = bytearray()
@@ -30,6 +32,8 @@ def compress(data, max_dict_size=65535):
     return bytes(compressed)
 
 def decompress(compressed, max_dict_size=65535):
+                                                    # Time complexity: T(n) = 
+                                                    # Space complexity: S(n) = 
     dictionary = {0: b''}
     next_code = 1
     decompressed = bytearray()
