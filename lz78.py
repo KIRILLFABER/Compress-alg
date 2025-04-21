@@ -2,14 +2,14 @@ import struct
 from collections import defaultdict
 
 def compress(data, max_dict_size=65535):
-                                        # Time complexity: T(n) = 4 + 9n + 5 O(n)
+                                        # Time complexity: T(n) = 4 + 
                                         # Space complexity: S(n) = 4 + 1 + 2 + 1 + O(n) = O(n)
     dictionary = {b'': 0}
     next_code = 1
     compressed = bytearray()
     w = b''
     
-    for byte in data:
+    for byte in data: # O(n)
         c = bytes([byte])
         wc = w + c
         if wc in dictionary:

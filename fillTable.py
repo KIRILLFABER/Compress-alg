@@ -25,17 +25,21 @@ def fillTable():
             for j in range(len(data_files)):
                 print('compressor - ', compressors_name[i])
                 print('file - ', data_files_name[j])
-                compress_file = compressors_list[i](data_files[j])
-                decompress_file = decompressors_list[i](compress_file)
-                table.loc[len(table)] = [compressors_name[i], data_files_name[j], len(data_files[j]), len(compress_file), len(decompress_file), metrics.compressFactor(compress_file, data_files[j]), data_files[j] == decompress_file]
-                f_comp = open(comp_path + compressors_name[i] + '_comp_' + data_files_name[j], 'wb')
-                f_decomp = open(decomp_path + compressors_name[i] + '_decomp_' + data_files_name[j], 'wb')
-                f_comp.write(compress_file)
-                f_decomp.write(decompress_file)
+                #if True:
+                if (int(input(f'{compressors_name[i]} - ')) == 1):
+                    compress_file = compressors_list[i](data_files[j])
+                    decompress_file = decompressors_list[i](compress_file)
+                    table.loc[len(table)] = [compressors_name[i], data_files_name[j], len(data_files[j]), len(compress_file), len(decompress_file), metrics.compressFactor(compress_file, data_files[j]), data_files[j] == decompress_file]
+                    f_comp = open(comp_path + compressors_name[i] + '_comp_' + data_files_name[j], 'wb')
+                    f_decomp = open(decomp_path + compressors_name[i] + '_decomp_' + data_files_name[j], 'wb')
+                    f_comp.write(compress_file)
+                    f_decomp.write(decompress_file)
+                    
+                
 
 
-                f_comp.close()
-                f_decomp.close()
+                    f_comp.close()
+                    f_decomp.close()
 
         
 
